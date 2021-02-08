@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum EnumValue {
     True = 0,
@@ -76,6 +76,7 @@ fn struct_value_if(values: &[StructValue]) -> (usize, usize, usize) {
 
 fn criterion_value_benchmark(c: &mut Criterion) {
     let n: usize = 100_000_000;
+    //let mut group = c.benchmark_group("value");
     let enum_values: Vec<_> = (0..n)
         .map(|i| {
             let i = i % 3;
@@ -98,15 +99,18 @@ fn criterion_value_benchmark(c: &mut Criterion) {
         .collect();
 
     c.bench_function("EnumValue match", |b| {
-        b.iter(|| enum_value_match(&enum_values))
+        b.iter(|| enum_value_match(black_box(&enum_values)))
     });
-    c.bench_function("EnumValue if", |b| b.iter(|| enum_value_if(&enum_values)));
+    c.bench_function("EnumValue if", |b| {
+        b.iter(|| enum_value_if(black_box(&enum_values)))
+    });
     c.bench_function("StructValue match", |b| {
-        b.iter(|| struct_value_match(&struct_values))
+        b.iter(|| struct_value_match(black_box(&struct_values)))
     });
     c.bench_function("StructValue if", |b| {
-        b.iter(|| struct_value_if(&struct_values))
+        b.iter(|| struct_value_if(black_box(&struct_values)))
     });
+    //group.finish();
 }
 
 criterion_group!(benches, criterion_value_benchmark);
